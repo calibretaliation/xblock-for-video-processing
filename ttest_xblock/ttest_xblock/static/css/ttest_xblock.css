@@ -1,0 +1,9 @@
+/* CSS for TestXBlock */
+
+.ttest_xblock_block .count {
+    font-weight: bold;
+}
+
+.ttest_xblock_block p {
+    cursor: pointer;
+}
