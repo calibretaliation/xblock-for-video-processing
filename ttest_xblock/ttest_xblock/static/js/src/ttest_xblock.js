@@ -1,6 +1,8 @@
 /* Javascript for TestXBlock. */
 function TestXBlock(runtime, element) {
 
+
+
     function updateCount(result) {
         $('.count', element).text(result.count);
     }

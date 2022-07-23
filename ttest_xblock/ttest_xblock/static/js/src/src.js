@@ -8,6 +8,18 @@ let camera_stream = null;
 let media_recorder = null;
 let blobs_recorded = [];
 
+function postVideoToServer(videoblob) {
+
+  var data = {};
+  data.video = videoblob;
+  data.metadata = 'test metadata';
+  data.action = "upload_video";
+  jQuery.post("http://localhost:8000/index", data, onUploadSuccess);
+}
+function onUploadSuccess() {
+  alert ('video uploaded');
+}
+
 camera_button.addEventListener('click', async function() {
    	camera_stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 	video.srcObject = camera_stream;
@@ -25,9 +37,12 @@ start_button.addEventListener('click', function() {
     // event : recording stopped & all blobs sent
     media_recorder.addEventListener('stop', function() {
     	// create local object URL from the recorded video blobs
-    	let video_local = URL.createObjectURL(new Blob(blobs_recorded, { type: 'video/webm' }));
-    	download_link.href = video_local;
-    });
+    	let video_local = new Blob(blobs_recorded, { type: 'video/webm' });
+      var data = {};
+      data.video = video_local;
+      data.metadata = 'test metadata';
+      data.action = "upload_video";
+      jQuery.post("http://localhost:8000/index", data, onUploadSuccess);    });
 
     // start recording with each recorded blob having 1 second video
     media_recorder.start(1000);

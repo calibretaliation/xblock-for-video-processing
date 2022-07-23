@@ -1,22 +1,80 @@
-/* Javascript for TestXBlock. */
 function TestXBlock(runtime, element) {
+console.log(JSON.stringify(runtime));
+console.log(JSON.stringify(element));
+console.log(JSON.stringify($('button', element)))
+const videoElem = document.getElementById('video')
 
-    function updateCount(result) {
-        $('.count', element).text(result.count);
-    }
+var startBtn = document.getElementById('start-record')
+var endBtn = document.getElementById('stop-record')
+function SuccessUpdate(result) {
+    window.alert(result.value);
+}
+var recorder;
 
-    var handlerUrl = runtime.handlerUrl(element, 'increment_count');
+const settings = {
+video: true,
+audio: true
+}
 
-    $('p', element).click(function(eventObject) {
-        $.ajax({
-            type: "POST",
-            url: handlerUrl,
-            data: JSON.stringify({"hello": "world"}),
-            success: updateCount
-        });
-    });
+startBtn.addEventListener('click', function (e) {
+    navigator.mediaDevices.getUserMedia(settings).then((stream) => {
+        console.log(stream);
+        videoElem.srcObject = stream
 
-    $(function ($) {
-        /* Here's where you'd do things on page load. */
-    });
+        recorder = new MediaRecorder(stream)
+        console.log(recorder);
+
+        recorder.start();
+
+        const blobContainer = [];
+
+        recorder.ondataavailable = function (e) {
+            
+            blobContainer.push(e.data)
+        }
+
+        recorder.onerror = function (e) {
+            return console.log(e.error || new Error(e.name));
+        }
+
+        
+
+
+        recorder.onstop = function (e) {
+            console.log(window.URL.createObjectURL(new Blob(blobContainer)));
+            var newVideoEl = document.createElement('video')
+            newVideoEl.height = '400'
+            newVideoEl.width = '600'
+            newVideoEl.autoplay = true
+            newVideoEl.controls = true
+            newVideoEl.innerHTML = `<source src="${window.URL.createObjectURL(new Blob(blobContainer))}"
+             type="video/webm">`
+            //document.body.removeChild(videoElem)
+            //document.body.insertBefore(newVideoEl, startBtn);
+            
+
+            var video = new Blob(blobContainer);
+            var Mydata = {"file": video};
+            var streamUrl = runtime.handlerUrl(element, 'receive_video');
+            
+            $.ajax({
+                type: "POST",
+                url: streamUrl,
+                contentType : 'application/json; charset=utf-8',
+                data: JSON.stringify(Mydata),
+                success: SuccessUpdate
+            }); 
+        }
+        
+    })
+    
+})
+
+
+
+endBtn.addEventListener('click', function (e) {
+    videoElem.pause();
+    recorder.stop();
+    
+})
 }

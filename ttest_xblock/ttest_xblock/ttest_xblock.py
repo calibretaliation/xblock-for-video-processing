@@ -6,8 +6,13 @@ from web_fragments.fragment import Fragment
 from xblock.core import XBlock
 from xblock.fields import Integer, Scope, Boolean, String 
 import cv2
-from django.http import StreamingHttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.urls import path
+from django.core.files.storage import FileSystemStorage
+from flask_uploads import UploadSet
+from werkzeug.utils import secure_filename
+#Change import in flask_uploads.py
+from flask import Flask, jsonify, request
 
 class TestXBlock(XBlock):
     """
@@ -43,59 +48,17 @@ class TestXBlock(XBlock):
         """
         html = self.resource_string("static/html/index.html")
         frag = Fragment(html.format(self=self))
-        frag.add_javascript(self.resource_string("static/js/src/src.js"))
+        frag.add_javascript(self.resource_string("static/js/src/stream.js"))
         frag.initialize_js('TestXBlock')
         return frag
-
-    # TO-DO: change this handler to perform your own actions.  You may need more
-    # than one handler, or you may not need any handlers at all.
     @XBlock.json_handler
-    def increment_count(self, data, suffix=''):
-        """
-        An example handler, which increments the data.
-        """
-        # Just to show data coming in...
-        assert data['hello'] == 'world'
+    def receive_video(self, data, suffix=''):
+            myfile = data['file']
+            fs = FileSystemStorage()
 
-        self.count += 2
-                
-        return {"count": self.count}
-    
-    # @XBlock.json_handler
-    # def stream(self,data, suffix =''):
-    #     return render()
-        # cap = cv2.VideoCapture(0) 
-
-        # while True:
-        #     ret, frame = cap.read()
-
-        #     if not ret:
-        #         print("Error: failed to capture image")
-        #         break
-        #     cv2.imwrite("static/image/streaming.jpg", frame)
-        #     self.streaming = pkg_resources.resource_filename(__name__,"static/image/streaming.jpg")
-        #     print(self.streaming)
-        #     return {"streaming" : f"{self.streaming}"}
-    # def video_feed(request):
-    #     def stream():
-    #         cap = cv2.VideoCapture(0) 
-
-    #         while True:
-    #             ret, frame = cap.read()
-
-    #             if not ret:
-    #                 print("Error: failed to capture image")
-    #                 break
-
-    #             cv2.imwrite('demo.jpg', frame)
-    #             yield (b'--frame\r\n'
-    #                 b'Content-Type: image/jpeg\r\n\r\n' + open('demo.jpg', 'rb').read() + b'\r\n')
-
-    
-    #     return StreamingHttpResponse(stream(), content_type='multipart/x-mixed-replace; boundary=frame')
-
-    # TO-DO: change this to create the scenarios you'd like to see in the
-    # workbench while developing your XBlock.
+            #fs.save('video.mp4', myfile)
+            return {"value": "1"}
+            # uploaded_file_url = fs.url(filename)
     @staticmethod
     def workbench_scenarios():
         """A canned scenario for display in the workbench."""
