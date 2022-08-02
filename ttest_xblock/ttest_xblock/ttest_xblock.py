@@ -1,5 +1,8 @@
 """TO-DO: Write a description of what this XBlock is."""
 
+import base64
+import io
+import json
 from django.shortcuts import render
 import pkg_resources
 from web_fragments.fragment import Fragment
@@ -13,6 +16,7 @@ from flask_uploads import UploadSet
 from werkzeug.utils import secure_filename
 #Change import in flask_uploads.py
 from flask import Flask, jsonify, request
+import requests
 
 class TestXBlock(XBlock):
     """
@@ -53,12 +57,15 @@ class TestXBlock(XBlock):
         return frag
     @XBlock.json_handler
     def receive_video(self, data, suffix=''):
-            myfile = data['file']
-            fs = FileSystemStorage()
-
+            video_content = data['file']
             #fs.save('video.mp4', myfile)
+            print(type(data['file']))
+            # print(json.loads(video_content))
+            with open('video.txt', 'w') as f_vid:
+                f_vid.write(video_content)
             return {"value": "1"}
             # uploaded_file_url = fs.url(filename)
+
     @staticmethod
     def workbench_scenarios():
         """A canned scenario for display in the workbench."""

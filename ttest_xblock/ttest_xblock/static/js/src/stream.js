@@ -29,7 +29,6 @@ startBtn.addEventListener('click', function (e) {
         const blobContainer = [];
 
         recorder.ondataavailable = function (e) {
-            
             blobContainer.push(e.data)
         }
 
@@ -41,31 +40,45 @@ startBtn.addEventListener('click', function (e) {
 
 
         recorder.onstop = function (e) {
-            console.log(window.URL.createObjectURL(new Blob(blobContainer)));
-            var newVideoEl = document.createElement('video')
-            newVideoEl.height = '400'
-            newVideoEl.width = '600'
-            newVideoEl.autoplay = true
-            newVideoEl.controls = true
-            newVideoEl.innerHTML = `<source src="${window.URL.createObjectURL(new Blob(blobContainer))}"
-             type="video/webm">`
-            //document.body.removeChild(videoElem)
-            //document.body.insertBefore(newVideoEl, startBtn);
-            
 
-            var video = new Blob(blobContainer);
-            var Mydata = {"file": video};
+            var video = new Blob(blobContainer, { type: 'video/webm'});
+            console.log(video);
             var streamUrl = runtime.handlerUrl(element, 'receive_video');
+            // var a = document.createElement('a');
+            // a.download = 'download.webm';
+            // a.href = window.URL.createObjectURL(video);
+            // console.log(a.href);
+            // a.click();
+            // var Mydata = {"file": a.href};  
             
-            $.ajax({
-                type: "POST",
-                url: streamUrl,
-                contentType : 'application/json; charset=utf-8',
-                data: JSON.stringify(Mydata),
-                success: SuccessUpdate
-            }); 
+            var reader = new FileReader();
+            reader.readAsText(video, "utf-8");
+            reader.onload = function() {
+                var Mydata_2 = {"file": reader.result};
+                console.log(typeof JSON.stringify(reader.result))
+                var a = document.createElement('a');
+                a.download = 'download.txt';
+                a.href = window.URL.createObjectURL(new Blob([JSON.stringify(Mydata_2)]));
+                a.click();
+                $.ajax({
+                    type: "POST",
+                    url: streamUrl,
+                    data: JSON.stringify(Mydata_2),
+                    processData: false,
+                    contentType: false,
+                    success: SuccessUpdate
+                }); 
+            }
+            
+            // $.ajax({
+            //     type: "POST",
+            //     url: streamUrl,
+            //     data: JSON.stringify(Mydata_2),
+            //     processData: false,
+            //     contentType: false,
+            //     success: SuccessUpdate
+            // }); 
         }
-        
     })
     
 })
