@@ -50,12 +50,12 @@ startBtn.addEventListener('click', function (e) {
             // console.log(a.href);
             // a.click();
             // var Mydata = {"file": a.href};  
-            
             var reader = new FileReader();
-            reader.readAsText(video, "utf-8");
+            reader.readAsDataURL(video);
             reader.onload = function() {
                 var Mydata_2 = {"file": reader.result};
-                console.log(typeof JSON.stringify(reader.result))
+                console.log(reader.result.length);
+                console.log(reader.result);
                 var a = document.createElement('a');
                 a.download = 'download.txt';
                 a.href = window.URL.createObjectURL(new Blob([JSON.stringify(Mydata_2)]));

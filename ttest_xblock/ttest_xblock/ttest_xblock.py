@@ -57,9 +57,15 @@ class TestXBlock(XBlock):
         return frag
     @XBlock.json_handler
     def receive_video(self, data, suffix=''):
-            video_content = data['file']
+            video_content = data['file'][23:]
             #fs.save('video.mp4', myfile)
+            print(len(data['file']))
             print(type(data['file']))
+            decoded_string = base64.b64decode(video_content) 
+
+            with open('video.webm', 'wb') as wfile:
+                wfile.write(decoded_string)
+
             # print(json.loads(video_content))
             with open('video.txt', 'w') as f_vid:
                 f_vid.write(video_content)
