@@ -4,6 +4,7 @@ import base64
 import io
 import json
 import cv2
+import pymongo
 from django.shortcuts import render
 import pkg_resources
 from web_fragments.fragment import Fragment
@@ -36,12 +37,6 @@ class TestXBlock(XBlock):
         return data.decode("utf8")
 
     def student_view(self, context=None):
-        """
-        The primary view of the TestXBlock, shown to students
-        when viewing courses.
-        """
-        self.student_count += 1
-        self.student_id = self.student_count
         self.count = 0
         html = self.resource_string("static/html/index.html")
         frag = Fragment(html.format(self=self))
@@ -60,7 +55,6 @@ class TestXBlock(XBlock):
     def receive_video(self, data, suffix=''):
             video_content = data['file'][22:]
             print(len(data['file']))
-
             print(type(data['file']))
             decoded_string = base64.b64decode(video_content) 
             video_name = f"video_{self.student_id}_{self.count}.mp4"
@@ -77,6 +71,11 @@ class TestXBlock(XBlock):
             elif  self.sleepy_state == 0:
                 return {"state": f"{ self.sleepy_state}"}
 
+    @XBlock.json_handler
+    def receive_id(self, data, suffix=''):
+        self.student_id = int(data['student_id'])
+        
+        return {"student_id": f"{self.student_id}"}
 
     @staticmethod
     def workbench_scenarios():

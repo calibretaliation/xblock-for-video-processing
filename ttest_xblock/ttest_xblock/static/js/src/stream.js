@@ -4,6 +4,24 @@ const originalVideoElem = document.getElementById('ovideo')
 var startBtn = document.getElementById('start-record')
 var endBtn = document.getElementById('stop-record')
 
+function IDUpdate(result) {
+    document.getElementById('student').textContent = result.student_id;
+}
+const form = document.getElementById('form_id');
+
+form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    var idUrl = runtime.handlerUrl(element, "receive_id");
+    var student_id = form.elements['student_id'].value;
+    $.ajax({
+        type: "POST",
+        url: idUrl,
+        data: JSON.stringify({"student_id": student_id}),
+        success: IDUpdate
+    }); 
+    console.log("DANG CHAY");
+});
+
 function SuccessUpdate(result) {
     if (result.state == 1) {
         document.getElementById('state').textContent = "DROWSY";
@@ -82,6 +100,7 @@ endBtn.addEventListener('click', function (e) {
     stream.getTracks().forEach( track => track.stop() ); 
     })
 })
+
 
 
 }

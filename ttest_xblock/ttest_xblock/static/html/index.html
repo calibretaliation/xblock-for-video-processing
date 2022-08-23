@@ -8,7 +8,14 @@
 </head>
 <body>
     <p>
-        THIS IS STUDENT NUMBER: {self.student_id}
+        <form id="form_id">
+            <label for="student_id">Student ID: </label><br>
+            <input type="number" id="student_id" ><br><br>
+            <input type="submit" value="Submit" >
+        </form>
+    </p>
+    <p>
+        THIS IS STUDENT NUMBER: <span id='student'> </span>
     </p>
     <p>
     <video autoplay id="ovideo" controls = "false" width="600" height="400">
