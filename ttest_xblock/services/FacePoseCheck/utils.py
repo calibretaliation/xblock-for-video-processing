@@ -16,7 +16,7 @@ drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
 def checkFacePose(image):
     # suppose input image is RGB 
     image = np.copy(image) # copy
-    image = cv2.cvtColor(cv2.flip(image, 1))
+    image = cv2.flip(image, 1)
     results = face_mesh.process(image)
     img_h, img_w, _ = image.shape 
     face_3d = [] 
@@ -65,10 +65,24 @@ def checkFacePose(image):
             z = angles[2] * 360 
             
             # see where the user head tilting 
-            if y > -15 and y < 15 and x > -15 and x < 15:
+            if y > -5 and y < 5 and x > -5 and x < 5:
                 text = 'CORRECT'
             else:
                 text = 'NOT CORRECT'
             return text 
     else:
         return 'FACE NOT FOUND'
+
+def run_check_pose_video(video):
+    cap = cv2.VideoCapture(video)
+    pose_result = ""
+    while True:
+        _, frame = cap.read()
+        
+        if not  _:
+            break
+        pose_result = checkFacePose(frame)       
+
+    cap.release()
+    
+    return pose_result

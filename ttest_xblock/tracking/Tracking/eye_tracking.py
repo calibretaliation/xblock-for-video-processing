@@ -19,7 +19,7 @@ def calculate_MAR(mouth):
     MAR = (A+B+C)/(3.0*D)
     MAR = round(MAR,2)
     return MAR
-def run_eye_check(video = "video.mp4"):
+def run_eye_check(video = "video.mp4", id = 0):
     cap = cv2.VideoCapture(video)
     countClose = 0
     currState = 0
@@ -121,7 +121,7 @@ def run_eye_check(video = "video.mp4"):
             cv2.putText(frame, "Are you Sleepy?", (20, 400),cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 4)
             # print("Drowsy")
 
-        cv2.imwrite("drowsy_detect.jpg", frame)
+        cv2.imwrite(f"drowsy_detect_{id}.jpg", frame)
 
         key = cv2.waitKey(1)
         if key == 27:

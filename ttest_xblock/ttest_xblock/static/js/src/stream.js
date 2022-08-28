@@ -19,16 +19,26 @@ form.addEventListener('submit', (event) => {
         data: JSON.stringify({"student_id": student_id}),
         success: IDUpdate
     }); 
-    console.log("DANG CHAY");
 });
 
 function SuccessUpdate(result) {
+    console.log(result.pose_check)
     if (result.state == 1) {
         document.getElementById('state').textContent = "DROWSY";
     }
     else {
         document.getElementById('state').textContent= "NOT DROWSY";
     }
+    if (result.pose_check == "2 FACE") {
+        window.alert("THERE ARE 2 FACES");
+    }
+    else if (result.pose_check == "FACE NOT FOUND") {
+        window.alert("FACE NOT FOUND");
+    }
+    else {
+        document.getElementById('pose').textContent= result.pose_check;
+    }
+
 }
 
 var recorder;
@@ -52,25 +62,20 @@ startBtn.addEventListener('click', function (e) {
 
         recorder.ondataavailable = function (e) {
             blobContainer.push(e.data)
-            console.log("data chunk: ", e.data.size)
         }
-        window.setInterval(function() {
+        interval_1 = window.setInterval(function() {
             recorder.stop();
             recorder.start();
-
         }, 100)
-        window.setInterval(function(){
-            console.log(blobContainer)
-            console.log(blobContainer.length)
+        interval_2 = window.setInterval(function(){
+
             var video = new Blob(blobContainer.splice(blobContainer.length - 1, 1), { type: 'video/mp4'});
-            console.log(video)
 
             var streamUrl = runtime.handlerUrl(element, 'receive_video');
             var reader = new FileReader();
             reader.readAsDataURL(video);
             reader.onload = function() {
                 var Mydata_2 = {"file": reader.result};
-                console.log("video blob: ", reader.result);
                 $.ajax({
                     type: "POST",
                     url: streamUrl,
@@ -99,8 +104,8 @@ endBtn.addEventListener('click', function (e) {
     navigator.mediaDevices.getUserMedia(settings).then((stream) => {
     stream.getTracks().forEach( track => track.stop() ); 
     })
+    clearInterval(interval_1);
+    clearInterval(interval_2);
 })
-
-
 
 }
