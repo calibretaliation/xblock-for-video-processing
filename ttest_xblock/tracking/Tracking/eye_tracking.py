@@ -1,10 +1,13 @@
+from calendar import month
+from time import monotonic
 import cv2
+import numpy as np
 import dlib
 from scipy.spatial import distance
 
 
 def calculate_EAR(eye):
-    A = distance.euclidean(eye[1],eye[2])
+    A = distance.euclidean(eye[1],eye[5])
     B = distance.euclidean(eye[2],eye[4])
     C = distance.euclidean(eye[0],eye[3])
     EAR = (A+B)/(2.0*C)
@@ -12,18 +15,25 @@ def calculate_EAR(eye):
     return EAR
 
 def calculate_MAR(mouth):
-    A = distance.euclidean(mouth[1], mouth[7])
-    B = distance.euclidean(mouth[2], mouth[6])
-    C = distance.euclidean(mouth[3], mouth[5])
-    D = distance.euclidean(mouth[0], mouth[4])
-    MAR = (A+B+C)/(3.0*D)
-    MAR = round(MAR,2)
+    
+    # Find center of upper lip and lower lip
+    m = np.array(mouth)
+    
+    center_upper_lip = (m[1:6] + m[12:17])/2
+    center_lower_lip = (m[11:6:-1] + m[12:17])/2
+        
+    # Calculate MAR
+    MAR = np.sum([distance.euclidean(center_upper_lip[i], center_lower_lip[i]) for i in range(len(center_lower_lip))]) \
+                / (2*distance.euclidean(m[0], m[6]))
+    
+   
     return MAR
-def run_eye_check(video = "video.mp4", id = 0):
+
+def run_eye_check(video = "video.mp4", id = 0, count = 1):
     cap = cv2.VideoCapture(video)
     countClose = 0
     currState = 0
-    alarmThreshold = 5
+    alarmThreshold = 3
 
     hog_face_detector = dlib.get_frontal_face_detector()
     dlib_facelandmark = dlib.shape_predictor("ttest_xblock/tracking/Tracking/68_face_landmarks_predictor.dat")
@@ -95,9 +105,7 @@ def run_eye_check(video = "video.mp4", id = 0):
             left_EAR = calculate_EAR(left_eye)
             right_EAR = calculate_EAR(right_eye)
             EAR = (left_EAR + right_EAR) / 2
-
-            MAR = calculate_MAR(mouth)
-
+            # print('EAR ' + str(EAR))
 
             if EAR < 0.26:
                 currState = 1
@@ -107,21 +115,41 @@ def run_eye_check(video = "video.mp4", id = 0):
                 countClose = 0
             # print("EAR :", EAR)
 
-            if MAR > 0.8:
+            # print("Mouth:" + str(mouth))
+        
+            MAR = calculate_MAR(mouth)
+            print('MAR ' + str(MAR))
+            
+            if MAR > 0.5:
+                for i, m in enumerate(mouth):
+                    cv2.putText(frame, "%d"%(i), m, cv2.FONT_HERSHEY_SIMPLEX, 0.25, (0, 0, 0))
                 cv2.putText(frame, "YAWN", (450, 100),cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 4)
                 cv2.putText(frame, "Are you Sleepy?", (20, 400),cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 4)
-                # print("Drowsy")
+                print("Drowsy")
                 currState = 1
             else:
                 currState = 0
+                cv2.putText(frame, "No YAWN", (450, 100),cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 4)
+                cv2.putText(frame, "Are you Sleepy?", (20, 400),cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 4)
             # print("MAR", MAR)
 
         if countClose > alarmThreshold:
+            for i, e in enumerate(left_eye):
+                cv2.putText(frame, "%d"%(i), e, cv2.FONT_HERSHEY_SIMPLEX, 0.25, (0, 0, 0))
+            for i, e in enumerate(right_eye):
+                cv2.putText(frame, "%d"%(i), e, cv2.FONT_HERSHEY_SIMPLEX, 0.25, (0, 0, 0))
             cv2.putText(frame, "DROWSY", (20, 100),cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 4)
             cv2.putText(frame, "Are you Sleepy?", (20, 400),cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 4)
             # print("Drowsy")
+        else:
+            for i, e in enumerate(left_eye):
+                cv2.putText(frame, "%d"%(i), e, cv2.FONT_HERSHEY_SIMPLEX, 0.25, (0, 0, 0))
+            for i, e in enumerate(right_eye):
+                cv2.putText(frame, "%d"%(i), e, cv2.FONT_HERSHEY_SIMPLEX, 0.25, (0, 0, 0))
+            cv2.putText(frame, "No DROWSY", (20, 100),cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 4)
+            cv2.putText(frame, "Are you Sleepy?", (20, 400),cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 4)
 
-        cv2.imwrite(f"drowsy_detect_{id}.jpg", frame)
+        cv2.imwrite(f"drowsy_detect_{id}_{count}.jpg", frame)
 
         key = cv2.waitKey(1)
         if key == 27:
