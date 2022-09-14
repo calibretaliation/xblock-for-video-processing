@@ -23,7 +23,7 @@ def run_eye_check(video = "video.mp4", id = 0):
     cap = cv2.VideoCapture(video)
     countClose = 0
     currState = 0
-    alarmThreshold = 5
+    alarmThreshold = 3
 
     hog_face_detector = dlib.get_frontal_face_detector()
     dlib_facelandmark = dlib.shape_predictor("ttest_xblock/tracking/Tracking/68_face_landmarks_predictor.dat")
@@ -98,8 +98,7 @@ def run_eye_check(video = "video.mp4", id = 0):
 
             MAR = calculate_MAR(mouth)
 
-
-            if EAR < 0.26:
+            if EAR < 0.1:
                 currState = 1
                 countClose += 1
             else:
@@ -107,13 +106,15 @@ def run_eye_check(video = "video.mp4", id = 0):
                 countClose = 0
             # print("EAR :", EAR)
 
-            if MAR > 0.8:
+            if MAR > 0.75:
                 cv2.putText(frame, "YAWN", (450, 100),cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 4)
                 cv2.putText(frame, "Are you Sleepy?", (20, 400),cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 4)
                 # print("Drowsy")
+                # countClose +=1
                 currState = 1
             else:
                 currState = 0
+                # countClose = 0
             # print("MAR", MAR)
 
         if countClose > alarmThreshold:

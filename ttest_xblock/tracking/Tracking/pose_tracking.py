@@ -2,7 +2,6 @@ import cv2
 import mediapipe as mp
 import pandas as pd
 
-cap = cv2.VideoCapture(0)
 
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose()
@@ -25,24 +24,25 @@ def draw_landmark_on_image(mp_drawing, results, img):
         cx, cy = int(lm.x*w), int(lm.y*h)
         cv2.circle(img,(cx, cy), 5, (255, 0, 0), cv2.FILLED)
     return img
+def runPoseCheck(video_name):
+    cap = cv2.VideoCapture(video_name)
+    while True:
+        ret, frame = cap.read()
+        if ret:
+            frameRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            results = pose.process(frameRGB)
+            if results.pose_landmarks:
+                lm = make_landmark_timestep(results)
+                lm_list.append(lm)
+                frame = draw_landmark_on_image(mp_drawing, results, frame)
 
-while True:
-    ret, frame = cap.read()
-    if ret:
-        frameRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = pose.process(frameRGB)
-        if results.pose_landmarks:
-            lm = make_landmark_timestep(results)
-            lm_list.append(lm)
-            frame = draw_landmark_on_image(mp_drawing, results, frame)
+            cv2.imwrite("image.jpg",frame)
 
-        cv2.imshow("image",frame)
-
-        if cv2.waitKey(1) == ord('q'):
+        else:
             break
 
-cap.release()
-cv2.destroyAllWindows()
+    cap.release()
+    cv2.destroyAllWindows()
 
 
 

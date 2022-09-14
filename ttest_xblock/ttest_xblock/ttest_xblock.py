@@ -6,6 +6,7 @@ import cv2
 from django.shortcuts import render
 import pkg_resources
 from services.FacePoseCheck.utils import run_check_pose_video
+from tracking.Tracking.pose_tracking import runPoseCheck
 from web_fragments.fragment import Fragment
 from xblock.core import XBlock
 from xblock.fields import Integer, Scope, Dict, List
@@ -18,6 +19,8 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, request
 import requests
 from tracking.Tracking.eye_tracking import  run_eye_check
+from tracking.Tracking.pose_tracking import runPoseCheck
+from face_recognition.face_recog_module import face_recog_module
 class TestXBlock(XBlock):
     student_id = Integer(help = "Student ID", 
         scope = Scope.user_state)
@@ -53,35 +56,50 @@ class TestXBlock(XBlock):
         frag.initialize_js('TestXBlock')
 
         return frag
+
     @XBlock.json_handler
-    def receive_video(self, data, suffix=''):
+    def receive_video(self, data, suffix=''): #receive and process videos sent when click start
             #save received data
             video_content = data['file'][22:]
             decoded_string = base64.b64decode(video_content) 
             video_name = f"video_{self.student_id}_{self.count}.mp4"
             with open(video_name, 'wb') as wfile:
                 wfile.write(decoded_string)
-            #to mark parts of video
+            #to mark number of parts of video
             self.count += 1
             #run eye check
             self.sleepy_state = run_eye_check(video_name, self.student_id)
             #run pose check
             self.pose_check = run_check_pose_video(video_name)
-            if  self.sleepy_state == 1:
-                self.student_summary[f"{self.student_id}"] = f"{self.sleepy_state}"
-                print(self.student_summary)
+            runPoseCheck(video_name)
+            self.student_summary[f"{self.student_id}"] = f"{self.sleepy_state}"
 
-                return{"state": f"{ self.sleepy_state}",
-                            "pose_check": f"{self.pose_check}",
-                            "student_id": f"{self.student_id}"}
-            elif  self.sleepy_state == 0:
-                self.student_summary[f"{self.student_id}"] = f"{self.sleepy_state}"
-                print(self.student_summary)
-                return{"state": f"{ self.sleepy_state}",
-                            "pose_check": f"{self.pose_check}",
-                            "student_id": f"{self.student_id}"}
+            return{"state": f"{ self.sleepy_state}",
+                        "pose_check": f"{self.pose_check}",
+                        "student_id": f"{self.student_id}"}
+    
     @XBlock.json_handler
-    def receive_id(self, data, suffix=''):
+    def diemdanh(self, data, suffix=''): #receive and process videos sent when click start
+            #save received data
+            video_content = data['file'][22:]
+            decoded_string = base64.b64decode(video_content) 
+            video_name = f"video_{self.student_id}_{self.count}.mp4"
+            with open(video_name, 'wb') as wfile:
+                wfile.write(decoded_string)
+            cap = cv2.VideoCapture(video_name)
+            result = "Chua doc video"
+            while True:
+                ret, frame = cap.read()
+                if ret:
+                    result = face_recog_module(frame)
+                else: 
+                    break
+
+            return{"diemdanh": f"{result}"}
+    
+
+    @XBlock.json_handler
+    def receive_id(self, data, suffix=''): #save student ID from front end
         self.student_id = int(data['student_id'])
         self.student_summary[f"{self.student_id}"] = f"{self.sleepy_state}"
         return {"student_id": f"{self.student_id}"}

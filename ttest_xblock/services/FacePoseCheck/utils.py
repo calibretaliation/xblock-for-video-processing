@@ -21,6 +21,8 @@ def checkFacePose(image):
     img_h, img_w, _ = image.shape 
     face_3d = [] 
     face_2d = [] 
+
+    print(len(results.multi_face_landmarks))
      
     if results.multi_face_landmarks:
         if len(results.multi_face_landmarks) > 1:
@@ -65,7 +67,7 @@ def checkFacePose(image):
             z = angles[2] * 360 
             
             # see where the user head tilting 
-            if y > -5 and y < 5 and x > -5 and x < 5:
+            if y > -12 and y < 12 and x > -10 and x < 10:
                 text = 'CORRECT'
             else:
                 text = 'NOT CORRECT'
