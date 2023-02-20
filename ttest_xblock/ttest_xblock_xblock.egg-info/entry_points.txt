@@ -1,2 +1,0 @@
-[xblock.v1]
-ttest_xblock = ttest_xblock:TestXBlock

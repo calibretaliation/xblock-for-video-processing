@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> 
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://www.WebRTC-Experiment.com/RecordRTC.js"></script>
+
+</head>
+<body>
+    <div class="wrapper">
+    <div style="width: 100%; overflow: hidden;">
+        <p>
+            <form id="form_id">
+                <label for="student_id">Mã định danh sinh viên (CMND/CCCD): </label>
+                <input type="number" id="student_id" >
+                <input type="submit" value="Submit" >
+            </form>
+        </p>
+        <div>
+            <video style="width: 200px; float: left;" class="video" autoplay id="ovideo" controls = "false" width="150" height="100">
+                <source src="" type=""  >
+            </video>
+        </div>
+        <div class="student-code">Mã số học viên: <span id='student'></span><br>      
+        <p style="margin-left: 200px;"> Phát hiện học viên: <span id='diemdanh'> </span> </p>
+        </div>
+    </div>
+    <div hidden class="course-code"><span id='course'>{self.course_id}</span></div>      
+
+          <!-- <p>Trạng thái buồn ngủ:
+              <span id="state"> </span>
+          </p>    
+          <p>Tư thế khuôn mặt:
+              <span id="head_pose"> </span>
+          </p>
+          <p>Phát hiện điện thoại:
+              <span id="phone"> </span>
+          </p>
+          <p>Phát hiện tư thế ngồi:
+              <span id="pose"> </span>
+          </p>
+          -->
+
+        <!-- <button id="stop-record">Stop Recording</button> -->
+    </div>
+</body>
+</html>
